@@ -1,15 +1,8 @@
 # 💡 Proje Fikir Taslağı
 
-## 🧑‍💻 Proje Sahibi:
-- **İsim**: (İsminizi buraya yazın)
-- **Tarih**: (Bu şablonu doldurduğunuz tarih)
-
----
-
 ## 📝 Proje Fikri:
-- **Proje Adı**: (Projenize bir isim verin)
-- **Kısa Açıklama**: 
-  (Projenin ne hakkında olduğunu ve amacını kısaca açıklayın.)
+- **Proje Adı**:
+- **Kısa Açıklama**:
 
 ---
 
@@ -42,16 +35,6 @@
 - **Ekstra Özellikler** (Opsiyonel):
   - (1. Özellik)
   - (2. Özellik)
-
----
-
-## ⏳ Zaman Çizelgesi (Tahmini):
-| Aşama             | Bitiş Tarihi  |
-|-------------------|---------------|
-| Planlama          | (YYYY-AA-GG)  |
-| MVP Geliştirme    | (YYYY-AA-GG)  |
-| Test ve Düzeltme  | (YYYY-AA-GG)  |
-| Final Teslimi     | (YYYY-AA-GG)  |
 
 ---
 
