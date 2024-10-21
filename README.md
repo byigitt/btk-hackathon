@@ -1,2 +1,2 @@
-# btk-hackathon
-btk-hackathon gdg cankaya
+# BTK Hackathon
+*Proje fikri bulunduğu zaman burası düzenlenecek*
