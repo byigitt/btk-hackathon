@@ -34,7 +34,7 @@
 - **Veritabanı**:
   - **MongoDB**: JSON formatında veri tutmak için esnek ve ölçeklenebilir NoSQL veritabanı.
 - **Ek Araçlar / APIler**:
-  - **OpenAI API**: Yapay zeka ile soruları akıllıca yanıtlamak için.
+  - **Gemini Flash AI API**: Yapay zeka ile soruları akıllıca yanıtlamak için.
   - **SerpAPI**: Güncel web arama sonuçlarına erişim sağlamak için.
   - **Firebase**: Kullanıcı oturumları ve gerçek zamanlı veriler için.
 
