@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'AIsearch API',
+      title: 'Mayıs API',
       version: '1.0.0',
-      description: 'API for AIsearch backend',
+      description: 'API for Mayıs backend',
     },
   },
   apis: ['./src/core/routes.ts'], // path to the API docs

@@ -3,7 +3,7 @@ import { okResponse } from '../utils/response';
 
 export const setupRoutes = (app: Application) => {
     app.get('/', (req, res) => {
-        res.json(okResponse('AIsearch backend is running'));
+        res.json(okResponse('mayis backend is running'));
     });
 
     app.get('/health', (req, res) => {
