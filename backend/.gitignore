@@ -5,3 +5,4 @@ instructions/
 *.log.*
 dist/
 cobalt-api-src/
+logs/
