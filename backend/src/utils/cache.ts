@@ -6,6 +6,6 @@ export const getCache = <T>(key: string): T | undefined => {
   return cache.get(key);
 };
 
-export const setCache = <T>(key: string, value: T, ttl: number = 100): boolean => {
+export const setCache = <T>(key: string, value: T, ttl = 100): boolean => {
   return cache.set(key, value, ttl);
 };
