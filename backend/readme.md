@@ -13,8 +13,7 @@ pnpm dev
 ```
 
 ## API Referansı
-
-[API Referansı](./swagger-ui/index.html)
+Swagger UI: http://localhost:3000/api-docs
 
 ## To-do
 - [ ] Heartbeat sayfası/API'si yapılacak

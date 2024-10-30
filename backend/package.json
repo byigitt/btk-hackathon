@@ -1,7 +1,7 @@
 {
-  "name": "aisearch-backend",
+  "name": "mayis-backend",
   "version": "1.0.0",
-  "description": "Backend service for AIsearch, a tool for searching the web with AI",
+  "description": "Backend service for Mayıs, a tool for searching the web with AI",
   "main": "dist/app.js",
   "scripts": {
     "start": "node dist/app.js",
