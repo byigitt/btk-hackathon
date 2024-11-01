@@ -41,7 +41,7 @@ const handleNavigate = () => {
           <button type="submit" className="send-button">Send</button>
         </form>
       </div>
-      <CustomButton label='home' onClick={handleNavigate}></CustomButton>
+      <CustomButton label='deneme' onClick={handleNavigate}></CustomButton>
     </div>
   );
 };
