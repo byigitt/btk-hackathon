@@ -1,14 +1,15 @@
-import { WebSocketServer, WebSocket } from 'ws';
+import type { WebSocketServer, WebSocket } from 'ws';
 import { errorResponse, okResponse } from '../utils/response';
 import { handleSearch } from '../processing/search';
 import { addToSearchHistory, getSearchHistory, clearSearchHistory } from '../services/searchHistory';
-import { IncomingMessage } from 'node:http';
+import type { IncomingMessage } from 'node:http';
 import { parse as parseUrl } from 'node:url';
 import { env } from '../config';
 
 interface WebSocketMessage {
     event: string;
     data: unknown;
+    gsearch?: boolean;
 }
 
 interface UserProfile {
@@ -192,7 +193,13 @@ export const setupWebSocketHandlers = (wss: WebSocketServer) => {
                 switch (message.event) {
                     case 'search': {
                         if (typeof message.data === 'string') {
-                            await handleSearch(client, message.data, client.userProfile);
+                            const skipGoogleSearch = message.gsearch === false;
+                            await handleSearch(
+                                client, 
+                                message.data, 
+                                client.userProfile,
+                                skipGoogleSearch
+                            );
                         } else {
                             client.send(JSON.stringify(
                                 errorResponse('Search query must be a string')
