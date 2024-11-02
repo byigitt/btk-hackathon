@@ -1,6 +1,6 @@
 import { Box, Paper, Skeleton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { ResultCardProps } from '../../../types/props/resultCardProps';
+import type { ResultCardProps } from '../../../types/props';
 import { StreamingText } from '../StreamingText/StreamingText';
 
 export const ResultCard: React.FC<ResultCardProps> = ({

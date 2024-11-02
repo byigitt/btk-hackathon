@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import type { StreamingTextProps } from '../../../types/props/streamingTextProps';
+import type { StreamingTextProps } from '../../../types/props';
 
 export const StreamingText: React.FC<StreamingTextProps> = ({ 
   text, 

@@ -1,7 +1,7 @@
 import { Box, Paper, Skeleton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import type { TextResultProps } from '../../../types/components';
+import type { TextResultProps } from '../../../types/props';
 
 export const TextResult: React.FC<TextResultProps> = ({ content, isLoading }) => {
   const renderSkeleton = () => (

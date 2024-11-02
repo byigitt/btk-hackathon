@@ -1,6 +1,6 @@
 import { Box, Link, Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { WebResultProps } from '../../../types/components';
+import type { WebResultProps } from '../../../types/props';
 
 export const WebResult: React.FC<WebResultProps> = ({ websites }) => {
   return (

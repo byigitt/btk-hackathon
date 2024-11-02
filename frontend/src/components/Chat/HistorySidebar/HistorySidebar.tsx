@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import type React from 'react';
 import { useState } from 'react';
-import type { HistorySidebarProps } from '../../../types/props/historySidebarProps';
+import type { HistorySidebarProps } from '../../../types/props';
 
 const DRAWER_WIDTH = 240;
 

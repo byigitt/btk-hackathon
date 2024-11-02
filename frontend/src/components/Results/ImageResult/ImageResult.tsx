@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { ImageResultProps } from '../../../types/components';
+import type { ImageResultProps } from '../../../types/props';
 
 export const ImageResult: React.FC<ImageResultProps> = ({ images }) => {
   return (

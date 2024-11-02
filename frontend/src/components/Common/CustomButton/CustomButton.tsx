@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import type { CustomButtonProps } from '../../../types/components';
+import type { CustomButtonProps } from '../../../types/props';
 
 const CustomButton: React.FC<CustomButtonProps> = ({ 
   label, 

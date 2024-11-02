@@ -1,6 +1,6 @@
 import { Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { SourcesCardProps } from '../../../types/props/sourcesCardProps';
+import type { SourcesCardProps } from '../../../types/props';
 
 export const SourcesCard: React.FC<SourcesCardProps> = ({
   googleResults,

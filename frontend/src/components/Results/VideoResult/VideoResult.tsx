@@ -1,6 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { VideoResultProps } from '../../../types/components';
+import type { VideoResultProps } from '../../../types/props';
 import { VideoCard } from './VideoCard';
 
 export const VideoResult: React.FC<VideoResultProps> = ({ videos, isLoading }) => {

@@ -1,7 +1,7 @@
 import SearchIcon from '@mui/icons-material/Search';
 import { IconButton, Paper, TextField } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { SearchBarProps } from '../../types/components';
+import type { SearchBarProps } from '../../types/props';
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   value,

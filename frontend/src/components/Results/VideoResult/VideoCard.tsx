@@ -1,6 +1,6 @@
 import { Card, CardContent, CardMedia, Link, Skeleton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { VideoCardProps } from '../../../types/props/videoCardProps';
+import type { VideoCardProps } from '../../../types/props';
 
 export const VideoCard: React.FC<VideoCardProps> = ({ video, isLoading }) => {
   if (isLoading) {
