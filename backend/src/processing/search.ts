@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import { env } from '../config';
 import { okResponse, errorResponse } from '../utils/response';
 import { addToSearchHistory } from '../services/searchHistory';
 import { GoogleSearch } from '../services/GoogleSearch';
-import { SearchResponse, CombinedSearchResult, GoogleSearchResult } from '../types/search';
+import type { SearchResponse, CombinedSearchResult, GoogleSearchResult } from '../types/search';
 import { ProxyManager } from '../services/ProxyManager';
 import { GeminiService } from '../services/GeminiService';
 
@@ -112,96 +112,61 @@ proxyManager.initialize().then(() => {
     return googleSearch.initialize();
 }).catch(console.error);
 
-let latestAiResponse = ''; // Add this to track the latest AI response
-
-// Mock AI response generator
-const getMockAIResponse = async (
-    query: string,
-    onPartialResponse: (response: string) => void
-): Promise<string> => {
-    const mockResponse = `Here's what I found about "${query}":
-
-## Overview
-This is a simulated AI response for testing purposes. The actual Gemini service is disabled to save costs during development.
-
-## Key Points
-1. This is a mock response
-2. It simulates streaming behavior
-3. It helps test the UI without API costs
-
-## Example Details
-- Point A: Some details about ${query}
-- Point B: More information
-- Point C: Additional context
-
-## Summary
-This is a test response that helps developers test the application without incurring API costs.`;
-
-    // Simulate streaming by sending the response in chunks
-    const chunks = mockResponse.split('\n');
-    let fullResponse = '';
-    
-    for (const chunk of chunks) {
-        await new Promise(resolve => setTimeout(resolve, 100)); // Simulate delay
-        fullResponse = `${fullResponse}${chunk}\n`; // Fixed string concatenation
-        onPartialResponse(fullResponse);
-    }
-
-    return mockResponse;
-};
-
 export const handleSearch = async (
     ws: SearchWebSocket, 
     query: string, 
-    userProfile: UserProfile = getDefaultProfile()
+    userProfile: UserProfile,
+    skipGoogleSearch = false
 ) => {
-    if (typeof query !== 'string') {
-        ws.send(JSON.stringify(
-            errorResponse('Invalid query format')
-        ));
-        return;
-    }
+    let latestAiResponse = ''; // Track latest AI response
 
     try {
         const [googleResults, geminiResponse] = await Promise.all([
-            Promise.race([
-                googleSearch.search(query).catch(error => {
-                    console.error('Google search error:', error.message);
-                    return [];
-                }),
-                new Promise<GoogleSearchResult[]>((_, reject) => 
-                    setTimeout(() => {
-                        console.log('Google search timeout');
+            // Only skip if explicitly set to false
+            (skipGoogleSearch === false) ? 
+                Promise.race([
+                    googleSearch.search(query).catch(error => {
+                        console.error('Google search error:', error.message);
                         return [];
-                    }, 30000)
-                )
-            ]).then(results => {
-                ws.send(JSON.stringify(
-                    okResponse('Google results received', {
-                        event: 'searchPartialResult',
-                        data: {
-                            type: 'partial',
-                            aiResponse: latestAiResponse,
-                            googleResults: results
-                        } as SearchResponse
-                    })
-                ));
-                return results;
-            }),
-            // Replace Gemini service with mock response
-            getMockAIResponse(query, (partialResponse: string) => {
-                latestAiResponse = partialResponse;
-                ws.send(JSON.stringify(
-                    okResponse('Partial AI response received', {
-                        event: 'searchPartialResult',
-                        data: {
-                            type: 'partial',
-                            aiResponse: partialResponse,
-                            googleResults: []
-                        } as SearchResponse
-                    })
-                ));
-            })
+                    }),
+                    new Promise<GoogleSearchResult[]>((_, reject) => 
+                        setTimeout(() => {
+                            console.log('Google search timeout');
+                            return [];
+                        }, 30000)
+                    )
+                ]).then(results => {
+                    ws.send(JSON.stringify(
+                        okResponse('Google results received', {
+                            event: 'searchPartialResult',
+                            data: {
+                                type: 'partial',
+                                aiResponse: latestAiResponse,
+                                googleResults: results
+                            } as SearchResponse
+                        })
+                    ));
+                    return results;
+                }) : Promise.resolve([]),
+
+            // Real Gemini AI response
+            geminiService.generateStreamingResponse(
+                query,
+                userProfile,
+                (partialResponse: string) => {
+                    latestAiResponse = partialResponse;
+                    ws.send(JSON.stringify(
+                        okResponse('Partial AI response received', {
+                            event: 'searchPartialResult',
+                            data: {
+                                type: 'partial',
+                                aiResponse: partialResponse,
+                                googleResults: [] // Empty array for partial responses
+                            } as SearchResponse
+                        })
+                    ));
+                }
+            )
         ]);
 
         const combinedResult: CombinedSearchResult = {
@@ -235,7 +200,5 @@ export const handleSearch = async (
         ws.send(JSON.stringify(
             errorResponse(`Search failed: ${errorMessage}`)
         ));
-    } finally {
-        latestAiResponse = '';
     }
 };
