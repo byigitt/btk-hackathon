@@ -11,10 +11,11 @@ import {
     Stack,
     Typography,
     Paper,
+    Button,
 } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import type React from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { wsService } from '../../../services/websocket';
@@ -24,6 +25,35 @@ import CustomButton from '../../Common/CustomButton';
 import { SearchBar } from '../../SearchBar/SearchBar';
 import { HistorySidebar } from '../HistorySidebar/HistorySidebar';
 import { ResultCard } from '../ResultCard/ResultCard';
+import ReplyIcon from '@mui/icons-material/Reply';
+
+// Add suggested follow-up questions
+const FOLLOW_UP_SUGGESTIONS = [
+  {
+    type: 'clarify',
+    questions: [
+      'Can you explain that in simpler terms?',
+      'Could you provide more details?',
+      'What do you mean by that specifically?'
+    ]
+  },
+  {
+    type: 'expand',
+    questions: [
+      'Tell me more about this topic',
+      'What are some related concepts?',
+      'Can you give me some examples?'
+    ]
+  },
+  {
+    type: 'compare',
+    questions: [
+      'How does this compare to other approaches?',
+      'What are the pros and cons?',
+      'What are the alternatives?'
+    ]
+  }
+];
 
 const ChatPage: React.FC = () => {
   const [searchHistory, setSearchHistory] = useLocalStorage<SearchHistory[]>('searchHistory', []);
@@ -32,6 +62,8 @@ const ChatPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedTimestamp, setSelectedTimestamp] = useState<number | undefined>();
   const [showSourcesSkeleton, setShowSourcesSkeleton] = useState(false);
+  const [followUps, setFollowUps] = useState<string[]>([]);
+  const [originalQuery, setOriginalQuery] = useState<string>('');
 
   // Get the current search from history based on selected timestamp
   const currentSearchItem = useMemo(() => {
@@ -106,55 +138,73 @@ const ChatPage: React.FC = () => {
     };
   }, []); // Remove dependencies to maintain stable connection
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('🔍 Search initiated:', currentSearch);
-    
-    if (!currentSearch.trim() || isLoading) {
-      console.log('⚠️ Search cancelled: Empty query or already loading');
+  // Generate follow-up questions based on the current response
+  const generateFollowUps = useCallback((query: string, response: string) => {
+    const selectedQuestions = FOLLOW_UP_SUGGESTIONS.map(type => 
+      type.questions[Math.floor(Math.random() * type.questions.length)]
+    );
+    setFollowUps(selectedQuestions);
+    if (!query.includes('Regarding')) {
+      setOriginalQuery(query);
+    }
+  }, []);
+
+  // Handle follow-up question click
+  const handleFollowUp = (question: string) => {
+    const contextualQuery = `Regarding "${originalQuery}": ${question}`;
+    handleSearchWithQuery(contextualQuery, false);
+  };
+  const handleSearchWithQuery = async (query: string, gsearch = true) => {
+    if (!query.trim() || isLoading) {
       return;
     }
 
     try {
-      // Create new search immediately
       const timestamp = Date.now();
       setSearchHistory(prev => {
         const newSearch = {
-          query: currentSearch,
+          query,
           response: '',
           timestamp,
-          googleResults: []
+          // If gsearch is false, use the original query's Google results
+          googleResults: !gsearch && currentSearchItem?.googleResults 
+            ? currentSearchItem.googleResults 
+            : []
         };
         
         const filteredHistory = prev.filter(search => 
-          search.query.toLowerCase() !== currentSearch.toLowerCase()
+          search.query.toLowerCase() !== query.toLowerCase()
         );
 
         return [newSearch, ...filteredHistory];
       });
 
-      // Set states
       setSelectedTimestamp(timestamp);
       setIsLoading(true);
-      setShowSourcesSkeleton(true);
+      // Only show skeleton if we're doing a Google search
+      setShowSourcesSkeleton(gsearch);
 
-      console.log('📤 Sending WebSocket message:', {
-        event: 'search',
-        data: currentSearch
-      });
-
-      // Send search request
       wsService.send({
         event: 'search',
-        data: currentSearch
+        data: {
+          query,
+          gsearch // Send gsearch flag to backend
+        }
       });
       
+      generateFollowUps(query, '');
       setCurrentSearch('');
     } catch (error) {
       console.error('❌ Search error:', error);
       setIsLoading(false);
       setShowSourcesSkeleton(false);
     }
+  };
+
+  // Modify original handleSearch to use the new helper with gsearch: true
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSearchWithQuery(currentSearch, true);
   };
 
   const renderSourcesSkeleton = () => (
@@ -593,6 +643,54 @@ const ChatPage: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Follow-up Questions */}
+          {!isLoading && followUps.length > 0 && currentSearchItem?.response && (
+            <Box sx={{ mt: 4 }}>
+              <Typography 
+                variant="subtitle1"
+                color="text.secondary"
+                sx={{ 
+                  mb: 2,
+                  fontWeight: 500,
+                  fontSize: '0.9rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5
+                }}
+              >
+                Follow-up Questions
+              </Typography>
+              <Stack spacing={2}>
+                {followUps.map((question, index) => (
+                  <motion.div
+                    key={question}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => handleFollowUp(question)}
+                      startIcon={<ReplyIcon />}
+                      fullWidth
+                      sx={{
+                        justifyContent: 'flex-start',
+                        textAlign: 'left',
+                        py: 1,
+                        borderRadius: 2,
+                        '&:hover': {
+                          backgroundColor: 'action.hover'
+                        }
+                      }}
+                    >
+                      {question}
+                    </Button>
+                  </motion.div>
+                ))}
+              </Stack>
+            </Box>
+          )}
         </Container>
       </Box>
     </Box>
