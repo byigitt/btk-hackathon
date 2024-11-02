@@ -1,6 +1,6 @@
 {
-  "name": "my-app",
-  "version": "0.1.0",
+  "name": "aisearch",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -21,6 +21,7 @@
     "react-markdown": "^9.0.1",
     "react-router-dom": "^6.27.0",
     "react-scripts": "5.0.1",
+    "sharp": "^0.33.5",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
@@ -28,7 +29,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "generate-icons": "node scripts/generate-icons.js"
   },
   "eslintConfig": {
     "extends": [
@@ -47,5 +49,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/sharp": "^0.32.0"
   }
 }
