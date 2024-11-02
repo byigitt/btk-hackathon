@@ -1,13 +1,6 @@
 import { Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { GoogleResult } from '../../../types/websocket';
-
-interface SourcesCardProps {
-  googleResults?: GoogleResult[];
-  isLoading: boolean;
-  renderGoogleResults: (results: GoogleResult[]) => React.ReactNode;
-  renderSourcesSkeleton: () => React.ReactNode;
-}
+import type { SourcesCardProps } from '../../../types/props/sourcesCardProps';
 
 export const SourcesCard: React.FC<SourcesCardProps> = ({
   googleResults,
@@ -15,15 +8,14 @@ export const SourcesCard: React.FC<SourcesCardProps> = ({
   renderGoogleResults,
   renderSourcesSkeleton
 }) => {
-  if (!googleResults?.length && !isLoading) return null;
-
   return (
     <Paper 
       elevation={1}
       sx={{ 
         p: 3, 
         mb: 3,
-        borderRadius: 3
+        borderRadius: 3,
+        minHeight: 200
       }}
     >
       <Typography 
@@ -40,14 +32,13 @@ export const SourcesCard: React.FC<SourcesCardProps> = ({
         Sources & Related Content
       </Typography>
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
       >
-        {googleResults ? 
-          renderGoogleResults(googleResults) : 
-          renderSourcesSkeleton()
-        }
+        {isLoading ? renderSourcesSkeleton() : (
+          googleResults && googleResults.length > 0 && renderGoogleResults(googleResults)
+        )}
       </motion.div>
     </Paper>
   );

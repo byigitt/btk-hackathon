@@ -1,12 +1,41 @@
-import { Card, CardContent, CardMedia, Link, Typography } from '@mui/material';
+import { Card, CardContent, CardMedia, Link, Skeleton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
-import type { GoogleResult } from '../../../types/models/googleResult';
+import type { VideoCardProps } from '../../../types/props/videoCardProps';
 
-interface VideoCardProps {
-  video: GoogleResult;
-}
+export const VideoCard: React.FC<VideoCardProps> = ({ video, isLoading }) => {
+  if (isLoading) {
+    return (
+      <Card 
+        sx={{ 
+          width: { xs: 140, sm: 160 },
+          boxShadow: 1
+        }}
+      >
+        <Skeleton 
+          variant="rectangular" 
+          width="100%" 
+          height={80}
+          animation="wave"
+        />
+        <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+          <Skeleton 
+            variant="text" 
+            width="100%" 
+            height={16} 
+            animation="wave"
+          />
+          <Skeleton 
+            variant="text" 
+            width="60%" 
+            height={12}
+            sx={{ mt: 0.5 }}
+            animation="wave"
+          />
+        </CardContent>
+      </Card>
+    );
+  }
 
-export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
