@@ -22,10 +22,12 @@ export interface ThemeContextType {
 
 export interface TextResultProps {
   content: string;
+  isLoading: boolean;
 }
 
 export interface VideoResultProps {
   videos: GoogleResult[];
+  isLoading: boolean;
 }
 
 export interface ImageResultProps {
