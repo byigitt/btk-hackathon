@@ -10,6 +10,7 @@ import {
     Skeleton,
     Stack,
     Typography,
+    Paper,
 } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import type React from 'react';
@@ -23,7 +24,6 @@ import CustomButton from '../../Common/CustomButton';
 import { SearchBar } from '../../SearchBar/SearchBar';
 import { HistorySidebar } from '../HistorySidebar/HistorySidebar';
 import { ResultCard } from '../ResultCard/ResultCard';
-import { SourcesCard } from '../SourcesCard/SourcesCard';
 
 const ChatPage: React.FC = () => {
   const [searchHistory, setSearchHistory] = useLocalStorage<SearchHistory[]>('searchHistory', []);
@@ -31,122 +31,228 @@ const ChatPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [selectedTimestamp, setSelectedTimestamp] = useState<number | undefined>();
+  const [showSourcesSkeleton, setShowSourcesSkeleton] = useState(false);
 
   // Get the current search from history based on selected timestamp
   const currentSearchItem = useMemo(() => {
     return searchHistory.find(search => search.timestamp === selectedTimestamp) || searchHistory[0];
   }, [searchHistory, selectedTimestamp]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    wsService.connect((response) => {
-      console.log('📩 Raw WebSocket Response:', response);
+  // Separate WebSocket message handler
+  const handleWebSocketMessage = (response: { 
+    success: boolean;
+    data?: {
+      event: string;
+      data?: {
+        type?: string;
+        aiResponse?: string;
+        googleResults?: GoogleResult[];
+      };
+    };
+  }) => {
+    console.log('📩 Raw WebSocket Response:', response);
 
-      if (response?.success && response?.data?.event === 'searchPartialResult') {
-        const searchData = response.data.data;
-        console.log('📝 Processed Response:', {
-          type: searchData.type,
-          aiResponse: searchData.aiResponse,
-          googleResults: searchData.googleResults
-        });
+    if (response?.success && response?.data?.event === 'searchPartialResult') {
+      const searchData = response.data.data;
+      if (!searchData) return;
 
-        setSearchHistory(prev => {
-          const updated = [...prev];
-          const lastSearch = updated[0];
-          
-          if (lastSearch) {
-            lastSearch.response = searchData.aiResponse || lastSearch.response || '';
-            
-            if (Array.isArray(searchData.googleResults) && searchData.googleResults.length > 0) {
-              lastSearch.googleResults = searchData.googleResults;
-            }
+      console.log('📝 Processed Response:', {
+        type: searchData.type,
+        aiResponse: searchData.aiResponse,
+        googleResults: searchData.googleResults
+      });
+
+      // Update search history with partial results
+      setSearchHistory(prev => {
+        const updated = [...prev];
+        const lastSearch = updated[0];
+        
+        if (lastSearch) {
+          // Update text immediately when we get it
+          if (searchData.aiResponse) {
+            lastSearch.response = searchData.aiResponse;
+            setIsLoading(false);
           }
           
-          return updated;
-        });
-      } else if (response?.success && response?.data?.event === 'searchComplete') {
-        console.log('🏁 Search Complete');
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      wsService.disconnect();
-    };
-  }, [setSearchHistory]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentSearch.trim() || isLoading) return;
-
-    const message = {
-      event: 'search',
-      data: currentSearch
-    };
-
-    setSearchHistory(prev => {
-      const newSearch = {
-        query: currentSearch,
-        response: '',
-        timestamp: Date.now()
-      };
-      
-      const filteredHistory = prev.filter(search => 
-        search.query.toLowerCase() !== currentSearch.toLowerCase()
-      );
-
-      return [newSearch, ...filteredHistory];
-    });
-
-    wsService.send(message);
-    setCurrentSearch('');
-    setIsLoading(true);
+          // Update Google results separately
+          if (Array.isArray(searchData.googleResults)) {
+            if (searchData.googleResults.length > 0) {
+              lastSearch.googleResults = searchData.googleResults;
+            } else if (showSourcesSkeleton) {
+              setShowSourcesSkeleton(false);
+            }
+          }
+        }
+        
+        return updated;
+      });
+    }
+    else if (response?.success && response?.data?.event === 'searchComplete') {
+      console.log('🏁 Search Complete');
+      setIsLoading(false);
+      setShowSourcesSkeleton(false);
+    }
   };
 
-  const renderStreamingSkeleton = () => (
-    <Box sx={{ mt: 3 }}>
-      <Stack spacing={1}>
-        {[1, 2, 3].map((i) => (
-          <Skeleton 
-            key={i} 
-            variant="text" 
-            width={`${Math.random() * 40 + 60}%`} 
-            sx={{ 
-              opacity: 1 - (i * 0.2),
-              height: 20
-            }}
-          />
-        ))}
-      </Stack>
-    </Box>
-  );
+  // WebSocket connection effect
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    useEffect(() => {
+    console.log('🔌 Connecting to WebSocket...');
+    wsService.connect(handleWebSocketMessage);
+
+    return () => {
+      console.log('🔌 Disconnecting WebSocket...');
+      wsService.disconnect();
+    };
+  }, []); // Remove dependencies to maintain stable connection
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('🔍 Search initiated:', currentSearch);
+    
+    if (!currentSearch.trim() || isLoading) {
+      console.log('⚠️ Search cancelled: Empty query or already loading');
+      return;
+    }
+
+    try {
+      // Create new search immediately
+      const timestamp = Date.now();
+      setSearchHistory(prev => {
+        const newSearch = {
+          query: currentSearch,
+          response: '',
+          timestamp,
+          googleResults: []
+        };
+        
+        const filteredHistory = prev.filter(search => 
+          search.query.toLowerCase() !== currentSearch.toLowerCase()
+        );
+
+        return [newSearch, ...filteredHistory];
+      });
+
+      // Set states
+      setSelectedTimestamp(timestamp);
+      setIsLoading(true);
+      setShowSourcesSkeleton(true);
+
+      console.log('📤 Sending WebSocket message:', {
+        event: 'search',
+        data: currentSearch
+      });
+
+      // Send search request
+      wsService.send({
+        event: 'search',
+        data: currentSearch
+      });
+      
+      setCurrentSearch('');
+    } catch (error) {
+      console.error('❌ Search error:', error);
+      setIsLoading(false);
+      setShowSourcesSkeleton(false);
+    }
+  };
 
   const renderSourcesSkeleton = () => (
-    <Box sx={{ mt: 4, mb: 3 }}>
-      <Skeleton variant="text" width="15%" sx={{ mb: 2 }} />
-      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-        {[1, 2, 3].map((i) => (
-          <Skeleton 
-            key={i}
-            variant="rounded" 
-            width={120} 
-            height={32} 
-            sx={{ borderRadius: '100px' }}
-          />
-        ))}
-      </Box>
-      
-      <Skeleton variant="text" width="15%" sx={{ mb: 2 }} />
-      <Box sx={{ display: 'flex', gap: 2, overflow: 'hidden' }}>
-        {[1, 2].map((i) => (
-          <Box key={i}>
-            <Skeleton variant="rectangular" width={200} height={100} />
-            <Skeleton variant="text" width={180} sx={{ mt: 1 }} />
-            <Skeleton variant="text" width={100} />
+    <>
+      {/* Web Sources Loading */}
+      <Box sx={{ mb: 3 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton 
+                key={i}
+                variant="rounded" 
+                width={120} 
+                height={32} 
+                sx={{ 
+                  borderRadius: '100px',
+                  bgcolor: 'action.hover',
+                  animation: 'pulse 1.5s infinite ease-in-out',
+                  '@keyframes pulse': {
+                    '0%, 100%': { opacity: 0.5 },
+                    '50%': { opacity: 0.8 }
+                  }
+                }}
+              />
+            ))}
           </Box>
-        ))}
+        </motion.div>
       </Box>
-    </Box>
+
+      {/* Videos Loading */}
+      <Box 
+          sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            overflowX: 'auto',
+            pb: 1,
+            '&::-webkit-scrollbar': {
+              height: 3,
+            },
+            '&::-webkit-scrollbar-track': {
+              bgcolor: 'transparent',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              bgcolor: 'rgba(0,0,0,0.1)',
+              borderRadius: 2,
+            },
+          }}
+        >
+          {[1, 2, 3, 4].map((i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.1 }}
+            >
+              <Box>
+                <Skeleton 
+                  variant="rectangular" 
+                  width={160} 
+                  height={90} 
+                  sx={{ 
+                    borderRadius: 1,
+                    bgcolor: 'action.hover',
+                    animation: 'pulse 1.5s infinite ease-in-out',
+                    '@keyframes pulse': {
+                      '0%, 100%': { opacity: 0.5 },
+                      '50%': { opacity: 0.8 }
+                    }
+                  }}
+                />
+                <Skeleton 
+                  variant="text" 
+                  width={140} 
+                  sx={{ 
+                    mt: 1,
+                    bgcolor: 'action.hover',
+                    animation: 'pulse 1.5s infinite ease-in-out',
+                    animationDelay: '0.2s'
+                  }} 
+                />
+                <Skeleton 
+                  variant="text" 
+                  width={80} 
+                  sx={{ 
+                    bgcolor: 'action.hover',
+                    animation: 'pulse 1.5s infinite ease-in-out',
+                    animationDelay: '0.4s'
+                  }} 
+                />
+              </Box>
+            </motion.div>
+          ))}
+      </Box>
+    </>
   );
 
   const renderVideo = (result: GoogleResult) => (
@@ -426,22 +532,48 @@ const ChatPage: React.FC = () => {
                   >
                     {currentSearchItem.query}
                   </Typography>
-
                   {/* Sources Card */}
-                  {(currentSearchItem.googleResults || (isLoading && currentSearchItem.timestamp === selectedTimestamp)) && (
-                    <SourcesCard
-                      googleResults={currentSearchItem.googleResults}
-                      isLoading={isLoading && currentSearchItem.timestamp === selectedTimestamp}
-                      renderGoogleResults={renderGoogleResults}
-                      renderSourcesSkeleton={renderSourcesSkeleton}
-                    />
+                  {currentSearchItem && (showSourcesSkeleton || currentSearchItem.googleResults && currentSearchItem.googleResults.length > 0) && (
+                    <Paper 
+                      elevation={1}
+                      sx={{ 
+                        p: 3, 
+                        mb: 3,
+                        borderRadius: 3,
+                        minHeight: 200
+                      }}
+                    >
+                      <Typography 
+                        variant="subtitle1"
+                        color="text.secondary"
+                        sx={{ 
+                          mb: 2,
+                          fontWeight: 500,
+                          fontSize: '0.9rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5
+                        }}
+                      >
+                        Sources & Related Content
+                      </Typography>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        {showSourcesSkeleton ? (
+                          renderSourcesSkeleton()
+                        ) : (
+                          currentSearchItem.googleResults && renderGoogleResults(currentSearchItem.googleResults)
+                        )}
+                      </motion.div>
+                    </Paper>
                   )}
 
                   {/* Result Card */}
                   <ResultCard
-                    response={currentSearchItem.response}
-                    isLoading={isLoading && currentSearchItem.timestamp === selectedTimestamp}
-                    renderStreamingSkeleton={renderStreamingSkeleton}
+                    response={currentSearchItem?.response}
+                    isLoading={isLoading}
                   />
 
                   {/* Timestamp */}
