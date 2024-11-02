@@ -16,14 +16,7 @@ import {
 } from '@mui/material';
 import type React from 'react';
 import { useState } from 'react';
-import type { SearchHistory } from '../../../types/models';
-
-interface HistorySidebarProps {
-  searchHistory: SearchHistory[];
-  onSelectHistory: (search: SearchHistory) => void;
-  onDeleteHistory: (timestamp: number) => void;
-  currentTimestamp?: number;
-}
+import type { HistorySidebarProps } from '../../../types/props/historySidebarProps';
 
 const DRAWER_WIDTH = 240;
 
