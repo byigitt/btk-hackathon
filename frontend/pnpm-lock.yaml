@@ -53,6 +53,9 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      react-intl:
+        specifier: ^6.8.5
+        version: 6.8.5(react@18.3.1)(typescript@4.9.5)
       react-markdown:
         specifier: ^9.0.1
         version: 9.0.1(@types/react@18.3.12)(react@18.3.1)
@@ -71,6 +74,9 @@ importers:
       web-vitals:
         specifier: ^2.1.4
         version: 2.1.4
+      workbox-window:
+        specifier: ^7.3.0
+        version: 7.3.0
     devDependencies:
       '@types/sharp':
         specifier: ^0.32.0
@@ -986,6 +992,35 @@ packages:
   '@floating-ui/utils@0.2.8':
     resolution: {integrity: sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==}
 
+  '@formatjs/ecma402-abstract@2.2.2':
+    resolution: {integrity: sha512-zReeOJo3gA6Lgk4gTsUUdCwwTBa+Tw0LcqKHD84JCAJdPSxsxKdKPAPXihVgKDZevIWFGi4UTpy7JJ3D5EWeSw==}
+
+  '@formatjs/fast-memoize@2.2.3':
+    resolution: {integrity: sha512-3jeJ+HyOfu8osl3GNSL4vVHUuWFXR03Iz9jjgI7RwjG6ysu/Ymdr0JRCPHfF5yGbTE6JCrd63EpvX1/WybYRbA==}
+
+  '@formatjs/icu-messageformat-parser@2.9.2':
+    resolution: {integrity: sha512-WAQ2zGbroadkWXUDDjbGUOBN0TeDUEC47lcXV8wTtFN1QYCI1T26AVWOHqvVMVBqXHheKa82myjEVaXWVTwBNA==}
+
+  '@formatjs/icu-skeleton-parser@1.8.6':
+    resolution: {integrity: sha512-rQXThZE7lxhw1eaOyu4mmFdKBYlh/dyYPSFB6hR3lZqPOm5vYdyHekQaxld9WIofZK2e3rxfel81RfAuy8kdIw==}
+
+  '@formatjs/intl-displaynames@6.8.2':
+    resolution: {integrity: sha512-p1oOYVBB3n2FpSRyXg0UYtXbh06yJQqIJOdaxxJukCH75WgxHqu8Hc1TBl13amJJjUykiQsXgaTwDe8/rpymBw==}
+
+  '@formatjs/intl-listformat@7.7.2':
+    resolution: {integrity: sha512-JJrYYmDPIxFn9WxNh6Mw3nl0FErP7IxvWv2qkvSFqRcpG2jtbPINv/ow+LYPZHSl6BeQduKlK1J5SIdemT6vaQ==}
+
+  '@formatjs/intl-localematcher@0.5.7':
+    resolution: {integrity: sha512-GGFtfHGQVFe/niOZp24Kal5b2i36eE2bNL0xi9Sg/yd0TR8aLjcteApZdHmismP5QQax1cMnZM9yWySUUjJteA==}
+
+  '@formatjs/intl@2.10.12':
+    resolution: {integrity: sha512-xdOYCKlK4P+swVrOdrdFkArYO6KDDOb97GScSVbxoja9tL6TxHgiRhqvEwqNcEj46SNdSAXLN3hvrLJR99fDqg==}
+    peerDependencies:
+      typescript: ^4.7 || 5
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
     engines: {node: '>=10.10.0'}
@@ -1578,6 +1613,9 @@ packages:
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
+
+  '@types/hoist-non-react-statics@3.3.5':
+    resolution: {integrity: sha512-SbcrWzkKBw2cdwRTwQAswfpB9g9LJWfjtUeW/jvNwbhC8cpmmNYVePa+ncbUe0rGTQ7G3Ff6mYUN2VMfLVr+Sg==}
 
   '@types/html-minifier-terser@6.1.0':
     resolution: {integrity: sha512-oh/6byDPnL1zeNXFrDXFLyZjkr1MsBG667IM792caf1L2UPOOMf65NFzjUH/ltyfwjAGfs1rsX1eftK0jC/KIg==}
@@ -3454,6 +3492,9 @@ packages:
     resolution: {integrity: sha512-NGnrKwXzSms2qUUih/ILZ5JBqNTSa1+ZmP6flaIp6KmSElgE9qdndzS3cqjrDovwFdmwsGsLdeFgB6suw+1e9g==}
     engines: {node: '>= 0.4'}
 
+  intl-messageformat@10.7.4:
+    resolution: {integrity: sha512-D4wGk8/XAp/5YMLtTXR+BUyGeSl4+28N43cwXXmIGQ8Tt+STA/oUsz9KUerzgiwBlJ+2dRDsQ3qQvvlVF6jzFA==}
+
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
     engines: {node: '>= 0.10'}
@@ -5012,6 +5053,15 @@ packages:
   react-error-overlay@6.0.11:
     resolution: {integrity: sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg==}
 
+  react-intl@6.8.5:
+    resolution: {integrity: sha512-shWnEkOaMPq7FmDiHoi+pE2/WT9RXSRI9tk7MNylnKOpW71cOr2kXbtnJO4vdjaK8Enkm9D7/QzYzXkVIYfQVQ==}
+    peerDependencies:
+      react: ^16.6.0 || 17 || 18
+      typescript: ^4.7 || 5
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -6010,6 +6060,9 @@ packages:
   workbox-core@6.6.0:
     resolution: {integrity: sha512-GDtFRF7Yg3DD859PMbPAYPeJyg5gJYXuBQAC+wyrWuuXgpfoOrIQIvFRZnQ7+czTIQjIr1DhLEGFzZanAT/3bQ==}
 
+  workbox-core@7.3.0:
+    resolution: {integrity: sha512-Z+mYrErfh4t3zi7NVTvOuACB0A/jA3bgxUN3PwtAVHvfEsZxV9Iju580VEETug3zYJRc0Dmii/aixI/Uxj8fmw==}
+
   workbox-expiration@6.6.0:
     resolution: {integrity: sha512-baplYXcDHbe8vAo7GYvyAmlS4f6998Jff513L4XvlzAOxcl8F620O91guoJ5EOf5qeXG4cGdNZHkkVAPouFCpw==}
 
@@ -6049,6 +6102,9 @@ packages:
 
   workbox-window@6.6.0:
     resolution: {integrity: sha512-L4N9+vka17d16geaJXXRjENLFldvkWy7JyGxElRD0JvBxvFEd8LOhr+uXCcar/NzAmIBRv9EZ+M+Qr4mOoBITw==}
+
+  workbox-window@7.3.0:
+    resolution: {integrity: sha512-qW8PDy16OV1UBaUNGlTVcepzrlzyzNW/ZJvFQQs2j2TzGsg6IKjcpZC1RSquqQnTOafl5pCj5bGfAHlCjOOjdA==}
 
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
@@ -7250,6 +7306,55 @@ snapshots:
 
   '@floating-ui/utils@0.2.8': {}
 
+  '@formatjs/ecma402-abstract@2.2.2':
+    dependencies:
+      '@formatjs/fast-memoize': 2.2.3
+      '@formatjs/intl-localematcher': 0.5.7
+      tslib: 2.8.1
+
+  '@formatjs/fast-memoize@2.2.3':
+    dependencies:
+      tslib: 2.8.1
+
+  '@formatjs/icu-messageformat-parser@2.9.2':
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.2
+      '@formatjs/icu-skeleton-parser': 1.8.6
+      tslib: 2.8.1
+
+  '@formatjs/icu-skeleton-parser@1.8.6':
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.2
+      tslib: 2.8.1
+
+  '@formatjs/intl-displaynames@6.8.2':
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.2
+      '@formatjs/intl-localematcher': 0.5.7
+      tslib: 2.8.1
+
+  '@formatjs/intl-listformat@7.7.2':
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.2
+      '@formatjs/intl-localematcher': 0.5.7
+      tslib: 2.8.1
+
+  '@formatjs/intl-localematcher@0.5.7':
+    dependencies:
+      tslib: 2.8.1
+
+  '@formatjs/intl@2.10.12(typescript@4.9.5)':
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.2
+      '@formatjs/fast-memoize': 2.2.3
+      '@formatjs/icu-messageformat-parser': 2.9.2
+      '@formatjs/intl-displaynames': 6.8.2
+      '@formatjs/intl-listformat': 7.7.2
+      intl-messageformat: 10.7.4
+      tslib: 2.8.1
+    optionalDependencies:
+      typescript: 4.9.5
+
   '@humanwhocodes/config-array@0.13.0':
     dependencies:
       '@humanwhocodes/object-schema': 2.0.3
@@ -7969,6 +8074,11 @@ snapshots:
   '@types/hast@3.0.4':
     dependencies:
       '@types/unist': 3.0.3
+
+  '@types/hoist-non-react-statics@3.3.5':
+    dependencies:
+      '@types/react': 18.3.12
+      hoist-non-react-statics: 3.3.2
 
   '@types/html-minifier-terser@6.1.0': {}
 
@@ -10187,6 +10297,13 @@ snapshots:
       hasown: 2.0.2
       side-channel: 1.0.6
 
+  intl-messageformat@10.7.4:
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.2
+      '@formatjs/fast-memoize': 2.2.3
+      '@formatjs/icu-messageformat-parser': 2.9.2
+      tslib: 2.8.1
+
   ipaddr.js@1.9.1: {}
 
   ipaddr.js@2.2.0: {}
@@ -12103,6 +12220,22 @@ snapshots:
 
   react-error-overlay@6.0.11: {}
 
+  react-intl@6.8.5(react@18.3.1)(typescript@4.9.5):
+    dependencies:
+      '@formatjs/ecma402-abstract': 2.2.2
+      '@formatjs/icu-messageformat-parser': 2.9.2
+      '@formatjs/intl': 2.10.12(typescript@4.9.5)
+      '@formatjs/intl-displaynames': 6.8.2
+      '@formatjs/intl-listformat': 7.7.2
+      '@types/hoist-non-react-statics': 3.3.5
+      '@types/react': 18.3.12
+      hoist-non-react-statics: 3.3.2
+      intl-messageformat: 10.7.4
+      react: 18.3.1
+      tslib: 2.8.1
+    optionalDependencies:
+      typescript: 4.9.5
+
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
@@ -13429,6 +13562,8 @@ snapshots:
 
   workbox-core@6.6.0: {}
 
+  workbox-core@7.3.0: {}
+
   workbox-expiration@6.6.0:
     dependencies:
       idb: 7.1.1
@@ -13495,6 +13630,11 @@ snapshots:
     dependencies:
       '@types/trusted-types': 2.0.7
       workbox-core: 6.6.0
+
+  workbox-window@7.3.0:
+    dependencies:
+      '@types/trusted-types': 2.0.7
+      workbox-core: 7.3.0
 
   wrap-ansi@7.0.0:
     dependencies:

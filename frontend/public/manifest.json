@@ -1,25 +1,44 @@
 {
-  "short_name": "Search App",
-  "name": "Advanced Search Application",
+  "short_name": "Mayıs Search",
+  "name": "Mayıs - AI Powered Search Assistant",
   "icons": [
     {
-      "src": "icons/favicon.png",
-      "sizes": "32x32",
-      "type": "image/png"
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
     },
     {
-      "src": "icons/search-icon-192.png",
+      "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "icons/search-icon-512.png",
+      "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#2196f3",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "orientation": "portrait",
+  "categories": ["search", "ai", "productivity"],
+  "description": "AI-powered search assistant with real-time responses and multilingual support",
+  "screenshots": [
+    {
+      "src": "screenshots/desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "screenshots/mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
 }
