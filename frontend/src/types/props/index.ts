@@ -13,6 +13,7 @@ export interface SearchBarProps {
   onChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   isLoading: boolean;
+  disabled?: boolean;
 }
 
 export interface ThemeContextType {
@@ -66,4 +67,10 @@ export interface StreamingTextProps {
 export interface VideoCardProps {
   video: GoogleResult;
   isLoading?: boolean;
+}
+
+export interface TranslationMessage {
+  id: string;
+  defaultMessage?: string;
+  description?: string;
 }
