@@ -23,8 +23,8 @@ export const useThemeIcons = () => {
     const manifest = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
     if (manifest) {
       const manifestData = {
-        "short_name": "Search App",
-        "name": "Advanced Search Application",
+        "short_name": "Mayıs AI Search",
+        "name": "Mayıs, AI destekli gerçek zamanlı arama asistanı",
         "icons": [
           {
             "src": `icons/${theme}/favicon.png`,
