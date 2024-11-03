@@ -192,11 +192,11 @@ export const setupWebSocketHandlers = (wss: WebSocketServer) => {
                 // Handle different event types
                 switch (message.event) {
                     case 'search': {
-                        if (typeof message.data === 'string') {
+                        if (typeof message.data === 'object' && message.data && typeof (message.data as {query?: string}).query === 'string') {
                             const skipGoogleSearch = message.gsearch === false;
                             await handleSearch(
                                 client, 
-                                message.data, 
+                                (message.data as {query: string}).query,
                                 client.userProfile,
                                 skipGoogleSearch
                             );
