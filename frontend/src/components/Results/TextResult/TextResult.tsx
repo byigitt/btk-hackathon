@@ -2,8 +2,11 @@ import { Box, Paper, Skeleton, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import type { TextResultProps } from '../../../types/props';
+import { useIntl } from 'react-intl';
 
 export const TextResult: React.FC<TextResultProps> = ({ content, isLoading }) => {
+  const intl = useIntl();
+
   const renderSkeleton = () => (
     <Box sx={{ minHeight: 200 }}>
       <Skeleton variant="text" width="100%" height={24} />
@@ -30,7 +33,7 @@ export const TextResult: React.FC<TextResultProps> = ({ content, isLoading }) =>
       }}
     >
       <Typography variant="h6" gutterBottom>
-        Text Result
+        {intl.formatMessage({ id: 'results.text.title' })}
       </Typography>
       <motion.div
         initial={{ opacity: 0 }}

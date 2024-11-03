@@ -1,12 +1,15 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import type { ImageResultProps } from '../../../types/props';
+import { useIntl } from 'react-intl';
 
 export const ImageResult: React.FC<ImageResultProps> = ({ images }) => {
+  const intl = useIntl();
+
   return (
     <Paper elevation={1} sx={{ p: 3, borderRadius: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Image Results
+        {intl.formatMessage({ id: 'results.image.title' })}
       </Typography>
       <motion.div
         initial={{ opacity: 0 }}

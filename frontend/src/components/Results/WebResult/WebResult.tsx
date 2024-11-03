@@ -1,12 +1,15 @@
 import { Box, Link, Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import type { WebResultProps } from '../../../types/props';
+import { useIntl } from 'react-intl';
 
 export const WebResult: React.FC<WebResultProps> = ({ websites }) => {
+  const intl = useIntl();
+
   return (
     <Paper elevation={1} sx={{ p: 3, borderRadius: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Web Results
+        {intl.formatMessage({ id: 'results.web.title' })}
       </Typography>
       <motion.div
         initial={{ opacity: 0 }}

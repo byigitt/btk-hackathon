@@ -5,31 +5,35 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { motion } from 'framer-motion';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const features = [
-  {
-    icon: <SearchIcon sx={{ fontSize: 40 }} />,
-    title: 'Smart Search',
-    description: 'Advanced search capabilities powered by AI to find exactly what you need'
-  },
-  {
-    icon: <ChatBubbleOutlineIcon sx={{ fontSize: 40 }} />,
-    title: 'Interactive Chat',
-    description: 'Natural conversation interface for complex queries and follow-up questions'
-  },
-  {
-    icon: <AutoAwesomeIcon sx={{ fontSize: 40 }} />,
-    title: 'AI-Powered Results',
-    description: 'Get intelligent, contextual responses enhanced by machine learning'
-  }
-];
+import { useIntl } from 'react-intl';
+import { useLocale } from '../../hooks/useLocale';
 
 const MainPage: React.FC = () => {
   const navigate = useNavigate();
+  const { currentLocale } = useLocale();
   const theme = useTheme();
+  const intl = useIntl();
+
+  const features = [
+    {
+      icon: <SearchIcon sx={{ fontSize: 40 }} />,
+      title: intl.formatMessage({ id: 'main.features.smartSearch.title' }),
+      description: intl.formatMessage({ id: 'main.features.smartSearch.description' })
+    },
+    {
+      icon: <ChatBubbleOutlineIcon sx={{ fontSize: 40 }} />,
+      title: intl.formatMessage({ id: 'main.features.interactiveChat.title' }),
+      description: intl.formatMessage({ id: 'main.features.interactiveChat.description' })
+    },
+    {
+      icon: <AutoAwesomeIcon sx={{ fontSize: 40 }} />,
+      title: intl.formatMessage({ id: 'main.features.aiPowered.title' }),
+      description: intl.formatMessage({ id: 'main.features.aiPowered.description' })
+    }
+  ];
 
   const handleNavigate = () => {
-    navigate('/chat');
+    navigate(`/${currentLocale}/chat`);
   };
 
   return (
@@ -48,7 +52,8 @@ const MainPage: React.FC = () => {
           background: theme.palette.mode === 'dark' 
             ? 'linear-gradient(45deg, #1a237e 30%, #0d47a1 90%)'
             : 'linear-gradient(45deg, #42a5f5 30%, #1976d2 90%)',
-          py: { xs: 8, md: 12 },
+          py: { xs: 6, md: 12 },
+          px: { xs: 2, md: 0 },
           color: 'white'
         }}
       >
@@ -66,43 +71,47 @@ const MainPage: React.FC = () => {
                   sx={{ 
                     fontWeight: 700,
                     mb: 2,
-                    fontSize: { xs: '2.5rem', md: '3.5rem' }
+                    fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' },
+                    textAlign: { xs: 'center', md: 'left' }
                   }}
                 >
-                  Advanced Search
+                  {intl.formatMessage({ id: 'main.hero.title' })}
                 </Typography>
                 <Typography 
                   variant="h5" 
                   sx={{ 
                     mb: 4,
                     opacity: 0.9,
-                    fontSize: { xs: '1.2rem', md: '1.5rem' }
+                    fontSize: { xs: '1rem', sm: '1.2rem', md: '1.5rem' },
+                    textAlign: { xs: 'center', md: 'left' }
                   }}
                 >
-                  Experience the next generation of search with AI-powered insights and natural conversations.
+                  {intl.formatMessage({ id: 'main.hero.subtitle' })}
                 </Typography>
-                <motion.div
-                  whileHover={{ translateY: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onClick={handleNavigate}
-                    sx={{
-                      bgcolor: 'white',
-                      color: 'primary.main',
-                      px: 4,
-                      py: 1.5,
-                      fontSize: '1.1rem',
-                      '&:hover': {
-                        bgcolor: 'rgba(255, 255, 255, 0.9)'
-                      }
-                    }}
+                <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                  <motion.div
+                    whileHover={{ translateY: -5 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    Try Now
-                  </Button>
-                </motion.div>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleNavigate}
+                      sx={{
+                        bgcolor: 'white',
+                        color: 'primary.main',
+                        px: { xs: 3, md: 4 },
+                        py: 1.5,
+                        fontSize: { xs: '1rem', md: '1.1rem' },
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.9)'
+                        }
+                      }}
+                    >
+                      {intl.formatMessage({ id: 'main.hero.tryNow' })}
+                    </Button>
+                  </motion.div>
+                </Box>
               </motion.div>
             </Grid>
             <Grid item xs={12} md={6}>
@@ -113,15 +122,18 @@ const MainPage: React.FC = () => {
               >
                 <Box
                   component="img"
-                  src={`${process.env.PUBLIC_URL}/icons/${theme.palette.mode}/search-icon-512.png`}
+                  src={`/${theme.palette.mode === 'dark' ? 'search-icon-dark' : 'search-icon-light'}.svg`}
                   alt="Search Illustration"
                   sx={{
                     width: '100%',
-                    maxWidth: 400,
+                    maxWidth: { xs: 280, sm: 400 },
                     height: 'auto',
                     display: 'block',
                     margin: 'auto',
-                    filter: 'drop-shadow(0px 4px 20px rgba(0, 0, 0, 0.2))'
+                    filter: theme.palette.mode === 'dark' 
+                      ? 'drop-shadow(0px 4px 20px rgba(255, 255, 255, 0.1))'
+                      : 'drop-shadow(0px 4px 20px rgba(0, 0, 0, 0.1))',
+                    my: { xs: 4, md: 0 }
                   }}
                 />
               </motion.div>
@@ -188,7 +200,10 @@ const MainPage: React.FC = () => {
             color="text.secondary" 
             align="center"
           >
-            © {new Date().getFullYear()} Advanced Search. All rights reserved.
+            {intl.formatMessage(
+              { id: 'main.footer.copyright' },
+              { year: new Date().getFullYear() }
+            )}
           </Typography>
         </Container>
       </Box>

@@ -17,6 +17,7 @@ import {
 import type React from 'react';
 import { useState } from 'react';
 import type { HistorySidebarProps } from '../../../types/props';
+import { useIntl } from 'react-intl';
 
 const DRAWER_WIDTH = 240;
 
@@ -29,6 +30,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isOpen, setIsOpen] = useState(!isMobile);
+  const intl = useIntl();
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -90,7 +92,7 @@ export const HistorySidebar: React.FC<HistorySidebarProps> = ({
             }}
           >
             <HistoryIcon sx={{ fontSize: '0.9rem' }} />
-            Search History
+            {intl.formatMessage({ id: 'chat.sidebar.title' })}
           </Typography>
         </Box>
         <List sx={{ pt: 0 }}>

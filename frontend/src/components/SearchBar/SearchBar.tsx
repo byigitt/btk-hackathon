@@ -1,3 +1,5 @@
+import type React from 'react';
+import { useIntl } from 'react-intl';
 import SearchIcon from '@mui/icons-material/Search';
 import { IconButton, Paper, TextField } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -7,8 +9,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   value,
   onChange,
   onSubmit,
-  isLoading
+  isLoading = false,
+  disabled = false
 }) => {
+  const intl = useIntl();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -28,17 +33,18 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           position: 'sticky',
           top: 16,
           zIndex: 1000,
-          backgroundColor: 'background.paper'
+          backgroundColor: 'background.paper',
+          opacity: disabled ? 0.7 : 1
         }}
       >
         <TextField
           fullWidth
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Search anything..."
+          placeholder={intl.formatMessage({ id: 'search.placeholder' })}
           variant="outlined"
           size="medium"
-          disabled={isLoading}
+          disabled={disabled || isLoading}
           sx={{
             '& .MuiOutlinedInput-root': {
               borderRadius: 2,
@@ -49,7 +55,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <IconButton 
           type="submit" 
           color="primary"
-          disabled={isLoading}
+          disabled={disabled || isLoading}
           sx={{ 
             p: 2,
             bgcolor: 'primary.main',
@@ -62,6 +68,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               bgcolor: 'action.disabledBackground'
             }
           }}
+          aria-label={intl.formatMessage({ id: 'search.button' })}
         >
           <SearchIcon />
         </IconButton>

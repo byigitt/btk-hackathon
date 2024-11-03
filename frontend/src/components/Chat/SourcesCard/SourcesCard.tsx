@@ -1,6 +1,7 @@
 import { Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import type { SourcesCardProps } from '../../../types/props';
+import { useIntl } from 'react-intl';
 
 export const SourcesCard: React.FC<SourcesCardProps> = ({
   googleResults,
@@ -8,6 +9,8 @@ export const SourcesCard: React.FC<SourcesCardProps> = ({
   renderGoogleResults,
   renderSourcesSkeleton
 }) => {
+  const intl = useIntl();
+
   return (
     <Paper 
       elevation={1}
@@ -29,7 +32,7 @@ export const SourcesCard: React.FC<SourcesCardProps> = ({
           letterSpacing: 0.5
         }}
       >
-        Sources & Related Content
+        {intl.formatMessage({ id: 'chat.sources.title' })}
       </Typography>
       <motion.div
         initial={{ opacity: 0 }}

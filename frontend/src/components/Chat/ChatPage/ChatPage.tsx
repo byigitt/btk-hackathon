@@ -20,37 +20,39 @@ import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { wsService } from '../../../services/websocket';
 import type { SearchHistory } from '../../../types/search';
-import type { GoogleResult } from '../../../types/websocket';
+import type { GoogleResult, WebSocketResponse } from '../../../types/websocket';
 import CustomButton from '../../Common/CustomButton';
 import { SearchBar } from '../../SearchBar/SearchBar';
 import { HistorySidebar } from '../HistorySidebar/HistorySidebar';
 import { ResultCard } from '../ResultCard/ResultCard';
 import ReplyIcon from '@mui/icons-material/Reply';
+import { useIntl } from 'react-intl';
+import { useLocale } from '../../../hooks/useLocale';
 
 // Add suggested follow-up questions
 const FOLLOW_UP_SUGGESTIONS = [
   {
     type: 'clarify',
-    questions: [
-      'Can you explain that in simpler terms?',
-      'Could you provide more details?',
-      'What do you mean by that specifically?'
+    questionKeys: [
+      'followup.clarify.1',
+      'followup.clarify.2',
+      'followup.clarify.3'
     ]
   },
   {
     type: 'expand',
-    questions: [
-      'Tell me more about this topic',
-      'What are some related concepts?',
-      'Can you give me some examples?'
+    questionKeys: [
+      'followup.expand.1',
+      'followup.expand.2',
+      'followup.expand.3'
     ]
   },
   {
     type: 'compare',
-    questions: [
-      'How does this compare to other approaches?',
-      'What are the pros and cons?',
-      'What are the alternatives?'
+    questionKeys: [
+      'followup.compare.1',
+      'followup.compare.2',
+      'followup.compare.3'
     ]
   }
 ];
@@ -64,90 +66,25 @@ const ChatPage: React.FC = () => {
   const [showSourcesSkeleton, setShowSourcesSkeleton] = useState(false);
   const [followUps, setFollowUps] = useState<string[]>([]);
   const [originalQuery, setOriginalQuery] = useState<string>('');
+  const [isConnected, setIsConnected] = useState(false);
+  const intl = useIntl();
+  const { currentLocale } = useLocale();
 
   // Get the current search from history based on selected timestamp
   const currentSearchItem = useMemo(() => {
     return searchHistory.find(search => search.timestamp === selectedTimestamp) || searchHistory[0];
   }, [searchHistory, selectedTimestamp]);
 
-  // Separate WebSocket message handler
-  const handleWebSocketMessage = (response: { 
-    success: boolean;
-    data?: {
-      event: string;
-      data?: {
-        type?: string;
-        aiResponse?: string;
-        googleResults?: GoogleResult[];
-      };
-    };
-  }) => {
-    console.log('📩 Raw WebSocket Response:', response);
-
-    if (response?.success && response?.data?.event === 'searchPartialResult') {
-      const searchData = response.data.data;
-      if (!searchData) return;
-
-      console.log('📝 Processed Response:', {
-        type: searchData.type,
-        aiResponse: searchData.aiResponse,
-        googleResults: searchData.googleResults
-      });
-
-      // Update search history with partial results
-      setSearchHistory(prev => {
-        const updated = [...prev];
-        const lastSearch = updated[0];
-        
-        if (lastSearch) {
-          // Update text immediately when we get it
-          if (searchData.aiResponse) {
-            lastSearch.response = searchData.aiResponse;
-            setIsLoading(false);
-          }
-          
-          // Update Google results separately
-          if (Array.isArray(searchData.googleResults)) {
-            if (searchData.googleResults.length > 0) {
-              lastSearch.googleResults = searchData.googleResults;
-            } else if (showSourcesSkeleton) {
-              setShowSourcesSkeleton(false);
-            }
-          }
-        }
-        
-        return updated;
-      });
-    }
-    else if (response?.success && response?.data?.event === 'searchComplete') {
-      console.log('🏁 Search Complete');
-      setIsLoading(false);
-      setShowSourcesSkeleton(false);
-    }
-  };
-
-  // WebSocket connection effect
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-    useEffect(() => {
-    console.log('🔌 Connecting to WebSocket...');
-    wsService.connect(handleWebSocketMessage);
-
-    return () => {
-      console.log('🔌 Disconnecting WebSocket...');
-      wsService.disconnect();
-    };
-  }, []); // Remove dependencies to maintain stable connection
-
   // Generate follow-up questions based on the current response
   const generateFollowUps = useCallback((query: string, response: string) => {
     const selectedQuestions = FOLLOW_UP_SUGGESTIONS.map(type => 
-      type.questions[Math.floor(Math.random() * type.questions.length)]
+      intl.formatMessage({ id: type.questionKeys[Math.floor(Math.random() * type.questionKeys.length)] })
     );
     setFollowUps(selectedQuestions);
     if (!query.includes('Regarding')) {
       setOriginalQuery(query);
     }
-  }, []);
+  }, [intl]);
 
   // Handle follow-up question click
   const handleFollowUp = (question: string) => {
@@ -166,7 +103,6 @@ const ChatPage: React.FC = () => {
           query,
           response: '',
           timestamp,
-          // If gsearch is false, use the original query's Google results
           googleResults: !gsearch && currentSearchItem?.googleResults 
             ? currentSearchItem.googleResults 
             : []
@@ -181,14 +117,21 @@ const ChatPage: React.FC = () => {
 
       setSelectedTimestamp(timestamp);
       setIsLoading(true);
-      // Only show skeleton if we're doing a Google search
       setShowSourcesSkeleton(gsearch);
+
+      console.log('📤 Sending search request:', {
+        event: 'search',
+        data: {
+          query: query.trim(),
+          gsearch: gsearch
+        }
+      });
 
       wsService.send({
         event: 'search',
         data: {
-          query,
-          gsearch // Send gsearch flag to backend
+          query: query.trim(),
+          gsearch: gsearch
         }
       });
       
@@ -505,6 +448,74 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    console.log('🔌 Connecting to WebSocket...');
+    
+    const handleOpen = () => {
+      console.log('🟢 WebSocket Connected');
+      setIsConnected(true);
+    };
+
+    const handleClose = () => {
+      console.log('🔴 WebSocket Disconnected');
+      setIsConnected(false);
+    };
+
+    const handleWebSocketMessage = (response: WebSocketResponse) => {
+      console.log('📩 Raw WebSocket Response:', response);
+      
+      if (response?.success && response?.message === 'Connected to WebSocket server') {
+        setIsConnected(true);
+      }
+      
+      if (response?.success && response?.data?.event === 'searchPartialResult') {
+        const searchData = response.data.data;
+        if (!searchData) return;
+
+        setSearchHistory(prev => {
+          const updated = [...prev];
+          const lastSearch = updated[0];
+          
+          if (lastSearch) {
+            if (searchData.aiResponse) {
+              lastSearch.response = searchData.aiResponse;
+              setIsLoading(false);
+            }
+            
+            if (Array.isArray(searchData.googleResults)) {
+              if (searchData.googleResults.length > 0) {
+                lastSearch.googleResults = searchData.googleResults;
+              } else if (showSourcesSkeleton) {
+                setShowSourcesSkeleton(false);
+              }
+            }
+          }
+          
+          return updated;
+        });
+      }
+      else if (response?.success && response?.data?.event === 'searchComplete') {
+        console.log('🏁 Search Complete');
+        setIsLoading(false);
+        setShowSourcesSkeleton(false);
+      }
+    };
+
+    wsService.connect(handleWebSocketMessage, handleOpen, handleClose);
+    setIsConnected(wsService.isConnected());
+
+    return () => {
+      console.log('🔌 Disconnecting WebSocket...');
+      wsService.disconnect();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleBackToHome = () => {
+    navigate(`/${currentLocale}`);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <HistorySidebar 
@@ -544,20 +555,70 @@ const ChatPage: React.FC = () => {
             }}
           >
             <CustomButton 
-              label="← Back to Home" 
-              onClick={() => navigate('/')}
+              label={intl.formatMessage({ id: 'nav.backToHome' })} 
+              onClick={handleBackToHome}
               variant="text"
               color="primary"
             />
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: isConnected ? 'success.main' : 'error.main',
+                  transition: 'background-color 0.3s ease'
+                }}
+              />
+              <Typography 
+                variant="caption" 
+                color="text.secondary"
+                sx={{ fontSize: '0.75rem' }}
+              >
+                {intl.formatMessage({ 
+                  id: isConnected ? 'nav.connected' : 'nav.disconnected' 
+                })}
+              </Typography>
+            </Box>
           </Box>
 
-          {/* Search Bar */}
-          <SearchBar
-            value={currentSearch}
-            onChange={setCurrentSearch}
-            onSubmit={handleSearch}
-            isLoading={isLoading}
-          />
+          {/* Search Bar - Now using the state for disabled status */}
+          <Box sx={{ position: 'relative' }}>
+            <SearchBar
+              value={currentSearch}
+              onChange={setCurrentSearch}
+              onSubmit={handleSearch}
+              isLoading={isLoading}
+              disabled={!isConnected}
+            />
+            {!isConnected && (
+              <Paper
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  p: 2,
+                  bgcolor: 'warning.light',
+                  borderRadius: 1,
+                  zIndex: 1,
+                  textAlign: 'center',
+                  width: '90%',
+                  maxWidth: 400
+                }}
+              >
+                <Typography variant="body2" color="warning.dark">
+                  {intl.formatMessage({ id: 'chat.websocket.disconnected' })}
+                </Typography>
+              </Paper>
+            )}
+          </Box>
 
           {/* Search Results - Now only showing current search */}
           <AnimatePresence mode="wait">
@@ -583,41 +644,43 @@ const ChatPage: React.FC = () => {
                     {currentSearchItem.query}
                   </Typography>
                   {/* Sources Card */}
-                  {currentSearchItem && (showSourcesSkeleton || currentSearchItem.googleResults && currentSearchItem.googleResults.length > 0) && (
-                    <Paper 
-                      elevation={1}
-                      sx={{ 
-                        p: 3, 
-                        mb: 3,
-                        borderRadius: 3,
-                        minHeight: 200
-                      }}
-                    >
-                      <Typography 
-                        variant="subtitle1"
-                        color="text.secondary"
+                  {currentSearchItem && (
+                    (showSourcesSkeleton || (currentSearchItem.googleResults && currentSearchItem.googleResults.length > 0)) && (
+                      <Paper 
+                        elevation={1}
                         sx={{ 
-                          mb: 2,
-                          fontWeight: 500,
-                          fontSize: '0.9rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: 0.5
+                          p: 3, 
+                          mb: 3,
+                          borderRadius: 3,
+                          minHeight: 200
                         }}
                       >
-                        Sources & Related Content
-                      </Typography>
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.4 }}
-                      >
-                        {showSourcesSkeleton ? (
-                          renderSourcesSkeleton()
-                        ) : (
-                          currentSearchItem.googleResults && renderGoogleResults(currentSearchItem.googleResults)
-                        )}
-                      </motion.div>
-                    </Paper>
+                        <Typography 
+                          variant="subtitle1"
+                          color="text.secondary"
+                          sx={{ 
+                            mb: 2,
+                            fontWeight: 500,
+                            fontSize: '0.9rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: 0.5
+                          }}
+                        >
+                          {intl.formatMessage({ id: 'chat.sources.title' })}
+                        </Typography>
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.4 }}
+                        >
+                          {showSourcesSkeleton ? (
+                            renderSourcesSkeleton()
+                          ) : (
+                            currentSearchItem.googleResults && renderGoogleResults(currentSearchItem.googleResults)
+                          )}
+                        </motion.div>
+                      </Paper>
+                    )
                   )}
 
                   {/* Result Card */}
@@ -658,7 +721,7 @@ const ChatPage: React.FC = () => {
                   letterSpacing: 0.5
                 }}
               >
-                Follow-up Questions
+                {intl.formatMessage({ id: 'chat.followUp.title' })}
               </Typography>
               <Stack spacing={2}>
                 {followUps.map((question, index) => (

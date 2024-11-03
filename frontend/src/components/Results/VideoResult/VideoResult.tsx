@@ -2,12 +2,16 @@ import { Box, Paper, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import type { VideoResultProps } from '../../../types/props';
 import { VideoCard } from './VideoCard';
+import { useIntl } from 'react-intl';
+import type { GoogleResult } from '../../../types/websocket';
 
 export const VideoResult: React.FC<VideoResultProps> = ({ videos, isLoading }) => {
+  const intl = useIntl();
+
   return (
     <Paper elevation={1} sx={{ p: 3, borderRadius: 2 }}>
       <Typography variant="h6" gutterBottom>
-        Video Results
+        {intl.formatMessage({ id: 'results.video.title' })}
       </Typography>
       <motion.div
         initial={{ opacity: 0 }}
@@ -18,12 +22,15 @@ export const VideoResult: React.FC<VideoResultProps> = ({ videos, isLoading }) =
           display: 'flex', 
           gap: 2, 
           flexWrap: 'wrap',
-          minHeight: 160 // Maintain minimum height during loading
+          minHeight: 160
         }}>
           {isLoading ? (
-            // Show 4 skeleton cards while loading
-            Array.from({ length: 4 }).map((_, index) => (
-              <VideoCard key={`skeleton-${index}`} video={{} as any} isLoading={true} />
+            ['sk1', 'sk2', 'sk3', 'sk4'].map((skeletonId) => (
+              <VideoCard 
+                key={skeletonId}
+                video={{} as GoogleResult} 
+                isLoading={true} 
+              />
             ))
           ) : (
             videos.map((video) => (
